@@ -1,0 +1,233 @@
+service: todo-app-service
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'} 
+  environment:
+    DYNAMODB_TABLE: todo-ddb
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:PutItem"
+        - "dynamodb:GetItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+        - "dynamodb:Scan"
+      Resource: 
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+    - Effect: "Allow"
+      Action:
+        - "lambda:InvokeFunction"
+        - "lambda:UpdateFunctionCode"
+        - "lambda:UpdateFunctionConfiguration"
+      Resource:
+        - "arn:aws:lambda:${self:provider.region}:*:function:${self:service}-${self:provider.stage}-*"
+
+functions:
+  createItem:
+    handler: src/handlers/createItem.create
+    events:
+      - http:
+          path: items
+          method: post
+    role: CreateItemLambdaRole
+
+  getItem:
+    handler: src/handlers/getItem.get
+    events:
+      - http: 
+          path: items/{id}
+          method: get
+          cors: true
+    role: GetItemLambdaRole
+
+  updateItem:
+    handler: src/handlers/updateItem.update
+    events:
+      - http: 
+          path: items/{id}
+          method: put
+          cors: true
+    role: UpdateItemLambdaRole
+
+  deleteItem:
+    handler: src/handlers/deleteItem.delete
+    events:
+      - http: 
+          path: items/{id}
+          method: delete
+          cors: true
+    role: DeleteItemLambdaRole
+
+  listItems:
+    handler: src/handlers/listItems.list
+    events:
+      - http: 
+          path: items
+          method: get
+          cors: true
+    role: ListItemsLambdaRole
+
+resources:
+  Resources:
+    CrudDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    CreateItemLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: CreateItemLambdaRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: 
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: createItemPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:PutItem
+                    - dynamodb:GetItem
+                    - dynamodb:UpdateItem
+                    - dynamodb:DeleteItem
+                    - dynamodb:Scan
+                  Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+                - Effect: Allow
+                  Action:
+                    - lambda:InvokeFunction
+                    - lambda:UpdateFunctionCode
+                    - lambda:UpdateFunctionConfiguration
+                  Resource: "arn:aws:lambda:${self:provider.region}:*:function:${self:service}-${self:provider.stage}-createItem"
+
+    GetItemLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: GetItemLambdaRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: 
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: getItemPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:GetItem
+                    - dynamodb:Scan
+                  Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+                - Effect: Allow
+                  Action:
+                    - lambda:InvokeFunction
+                    - lambda:UpdateFunctionCode
+                    - lambda:UpdateFunctionConfiguration
+                  Resource: "arn:aws:lambda:${self:provider.region}:*:function:${self:service}-${self:provider.stage}-getItem"
+
+    UpdateItemLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: UpdateItemLambdaRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: 
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: updateItemPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:UpdateItem
+                    - dynamodb:GetItem
+                    - dynamodb:Scan
+                  Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+                - Effect: Allow
+                  Action:
+                    - lambda:InvokeFunction
+                    - lambda:UpdateFunctionCode
+                    - lambda:UpdateFunctionConfiguration
+                  Resource: "arn:aws:lambda:${self:provider.region}:*:function:${self:service}-${self:provider.stage}-updateItem"
+
+    DeleteItemLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: DeleteItemLambdaRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: 
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: deleteItemPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:DeleteItem
+                    - dynamodb:GetItem
+                    - dynamodb:Scan
+                  Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+                - Effect: Allow
+                  Action:
+                    - lambda:InvokeFunction
+                    - lambda:UpdateFunctionCode
+                    - lambda:UpdateFunctionConfiguration
+                  Resource: "arn:aws:lambda:${self:provider.region}:*:function:${self:service}-${self:provider.stage}-deleteItem"
+
+    ListItemsLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ListItemsLambdaRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: 
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: listItemsPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:Scan
+                  Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+                - Effect: Allow
+                  Action:
+                    - lambda:InvokeFunction
+                    - lambda:UpdateFunctionCode
+                    - lambda:UpdateFunctionConfiguration
+                  Resource: "arn:aws:lambda:${self:provider.region}:*:function:${self:service}-${self:provider.stage}-listItems"
