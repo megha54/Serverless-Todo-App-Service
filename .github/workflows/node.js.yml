@@ -1,0 +1,41 @@
+name: Serverless-Todo-App-Service-ci-cd
+
+on:
+  push:
+    branches:
+      - prod
+      - staging
+      - dev
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm test
+
+      # Deploy only if tests pass
+      - name: Install Serverless Framework
+        if: success()
+        run: npm install -g serverless
+
+      - name: Deploy Serverless Application
+        if: success()
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          BRANCH_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
+          serverless deploy --stage $BRANCH_NAME
