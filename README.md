@@ -28,7 +28,7 @@ The system is built on a serverless architecture to ensure scalability, flexibil
 
 ### System Architecture Diagram
 
-
+[![System Architecture](./system-architecture.png)](./system-architecture.png)
 
 ---
 
@@ -71,7 +71,7 @@ To set up the project locally, follow these steps:
 
 1. Clone the repository:
    ```
-   
+   https://github.com/megha54/Serverless-Todo-App-Service.git
    ```
 
 2. Navigate to the project directory:
@@ -136,20 +136,20 @@ Test cases cover all CRUD operations, including **create**, **get**, **list**, *
 
 ### GitHub Actions Workflow
 
-This project uses **GitHub Actions** for Continuous Integration and Continuous Deployment (CI/CD). The pipeline automatically runs the following steps on each push to the main branch:
+This project uses **GitHub Actions** for Continuous Integration and Continuous Deployment (CI/CD). The pipeline automatically runs the following steps on each push to the `dev`, `staging`, `prod` branch:
 
-- **Linting and Formatting**: Ensures that the code follows best practices and style guides.
 - **Unit Testing**: Runs the Jest test suite to ensure all business logic works as expected.
 - **Deployment**: Automatically deploys the serverless application to AWS after successful tests.
 
-### CI/CD Pipeline Diagram
+Make sure to have environment with name `ci_cd_pipeline` in Secrets and Variables.
+Inside it add your AWS Credentials with following secrete name : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`.
 
-
+#### NOTE: for the sake of simplicity we are using same environment creation in secrets but in production usage we should have keys configured for different branches with respective branch name as environment name.
 
 ### How to Use the GitHub Actions Pipeline
 
-1. Ensure your repository contains a `.github/workflows/ci-cd.yml` file configured for your pipeline.
-2. On every push or pull request, GitHub Actions will:
+1. Ensure your repository contains a `.github/workflows/node.js.yml` file configured for your pipeline.
+2. On every push, GitHub Actions will:
    - Install dependencies
    - Run tests
    - Deploy to the AWS environment if all checks pass.
