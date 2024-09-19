@@ -5,9 +5,7 @@ provider:
   runtime: nodejs18.x
   region: us-east-1
   stage: ${opt:stage, 'dev'} 
-  credentials:
-    accessKeyId: ${env:AWS_ACCESS_KEY_ID}
-    secretAccessKey: ${env:AWS_SECRET_ACCESS_KEY}
+
   environment:
     DYNAMODB_TABLE: todo-ddb
   iamRoleStatements:
