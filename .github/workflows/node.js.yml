@@ -38,6 +38,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           SLS_DEPLOYMENT_NO_INTERACTIVE: 1
         run: |
-          echo $PATH
+          echo $AWS_ACCESS_KEY_ID
           BRANCH_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
           serverless deploy --stage $BRANCH_NAME
