@@ -39,4 +39,4 @@ jobs:
 
         run: |
           BRANCH_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
-          AWS_ACCESS_KEY_ID="$env:AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$env:AWS_SECRET_ACCESS_KEY" serverless deploy --stage $BRANCH_NAME
+          AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" serverless deploy --stage $BRANCH_NAME
