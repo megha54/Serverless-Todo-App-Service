@@ -1,42 +1,41 @@
 name: Serverless-Todo-App-Service-ci-cd
-
-on:
+'on':
   push:
     branches:
       - prod
       - staging
       - dev
-
 jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-
       - name: Install Dependencies
         run: npm install
-
       - name: Run Tests
         run: npm test
+    - name: serverless deploy
+      uses: serverless/github-action@v3
+      with:
+        args: deploy
+      env:
+        # SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+        # or if using AWS credentials directly
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      # Deploy only if tests pass
-      - name: Install Serverless Framework
-        if: success()
-        run: npm install -g serverless@3.33.0
+      # - name: Deploy Serverless Application
+      #   if: success()
+      #   env:
+      #     SLS_DEPLOYMENT_NO_INTERACTIVE: 1
+      #     AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+      #     AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+      #   run: |
+      #     BRANCH_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
 
-      - name: Deploy Serverless Application
-        if: success()
-        env:
-          SLS_DEPLOYMENT_NO_INTERACTIVE: 1
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-        run: |
-          BRANCH_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///')
-          AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" serverless deploy --stage $BRANCH_NAME
+      #     AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" serverless deploy --stage $BRANCH_NAME
