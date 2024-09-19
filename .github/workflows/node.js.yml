@@ -18,6 +18,8 @@ jobs:
           node-version: '18'
       - name: Install Dependencies
         run: npm install
+      - name: Install Serverless
+        run: npm install -g serverless@3.33.0
       - name: Run Tests
         run: npm test
       # - name: serverless deploy
